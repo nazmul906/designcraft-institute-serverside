@@ -3,6 +3,8 @@ require("dotenv").config();
 const cors = require("cors");
 const port = process.env.PORT || 5000;
 const app = express();
+const jwt = require("jsonwebtoken");
+
 app.use(cors());
 app.use(express.json());
 
@@ -29,6 +31,16 @@ async function run() {
     const userCollection = client.db("DesignCraft").collection("users");
 
     const classCollection = client.db("DesignCraft").collection("allclass");
+
+    // jwt
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+
+      const jwtToken = jwt.sign(user, process.env.SecretAccessToken, {
+        expiresIn: "8hr",
+      });
+      res.send({ jwtToken });
+    });
 
     //  registration
     app.post("/users", async (req, res) => {
