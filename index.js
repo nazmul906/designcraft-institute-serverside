@@ -29,6 +29,8 @@ async function run() {
     const userCollection = client.db("DesignCraft").collection("users");
 
     const classCollection = client.db("DesignCraft").collection("allclass");
+
+    //  registration
     app.post("/users", async (req, res) => {
       const user = req.body;
       const query = { email: user.email };
@@ -43,8 +45,18 @@ async function run() {
       res.send(result);
     });
 
+    // admin dashboard
     app.get("/users", async (req, res) => {
       const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
+    // instructor add class
+    app.post("/addclass", async (req, res) => {
+      const item = req.body;
+
+      const result = await classCollection.insertOne(item);
+      console.log(result);
       res.send(result);
     });
 
