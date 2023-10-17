@@ -10,7 +10,7 @@ app.get("/", (req, res) => {
   res.send("Corture savant");
 });
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.db_user}:${process.env.db_pass}@cluster0.w5hdwnt.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -74,6 +74,29 @@ async function run() {
       // const query = { email: email };
       const result = await classCollection.find(query).toArray();
       // console.log(result);
+      res.send(result);
+    });
+
+    // approved class
+    app.patch("/approve/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+
+      const updateDoc = {
+        $set: {
+          status: "approved",
+        },
+      };
+      const result = await classCollection.updateOne(filter, updateDoc);
+      // console.log("update", result);
+      res.send(result);
+    });
+
+    // display approve class
+    app.get("/approveclass", async (req, res) => {
+      const query = { status: "approved" };
+      const result = await classCollection.find(query).toArray();
+      //   console.log(result);
       res.send(result);
     });
 
