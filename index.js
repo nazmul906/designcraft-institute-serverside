@@ -42,6 +42,23 @@ async function run() {
       res.send({ jwtToken });
     });
 
+    // make admin by manual admin
+    app.patch("/users/admin/:id", async (req, res) => {
+      const id = req.params.id;
+
+      //   console.log(id);
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: "admin",
+        },
+      };
+
+      const result = await userCollection.updateOne(filter, updateDoc);
+
+      res.send(result);
+    });
+
     //  registration
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -109,6 +126,22 @@ async function run() {
       const query = { status: "approved" };
       const result = await classCollection.find(query).toArray();
       //   console.log(result);
+      res.send(result);
+    });
+
+    // deny by admin
+    app.patch("/myclass/deny/:id", async (req, res) => {
+      const id = req.params.id;
+      // find the item
+      const filter = { _id: new ObjectId(id) };
+      // update it
+      const updateDoc = {
+        $set: {
+          status: "denied by admin",
+        },
+      };
+      const result = await classCollection.updateOne(filter, updateDoc);
+      // console.log("denied", result);
       res.send(result);
     });
 
