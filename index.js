@@ -102,13 +102,13 @@ async function run() {
 
     // verify admin for dashboard
     app.get("/users/admin/:email", verifyJwt, async (req, res) => {
-      const userEmail = req.params.email;
-      console.log("usur", userEmail);
-      if (userEmail !== req.decoded.email) {
+      const adminEmail = req.params.email;
+
+      if (adminEmail !== req.decoded.email) {
         res.send({ admin: false });
       }
 
-      const query = { email: userEmail };
+      const query = { email: adminEmail };
       const user = await userCollection.findOne(query);
       // console.log("user", user);
       // if user exist then match his role
@@ -116,6 +116,20 @@ async function run() {
       res.send(result);
     });
 
+    // for useInstructor hook
+    app.get("/users/instructor/:email", verifyJwt, async (req, res) => {
+      const instructorEmail = req.params.email;
+      // console.log("instructorEmail", instructorEmail);
+      if (instructorEmail !== req.decoded.email) {
+        res.send({ instructor: false });
+      }
+      const query = { email: instructorEmail };
+      const user = await userCollection.findOne(query);
+      // console.log(user);
+      const result = { instructor: user?.role === "instructor" };
+      // response is {instructor:true}
+      res.send(result);
+    });
     // instructor add class
     app.post("/addclass", async (req, res) => {
       const item = req.body;
