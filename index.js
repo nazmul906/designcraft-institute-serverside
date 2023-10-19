@@ -8,6 +8,26 @@ const jwt = require("jsonwebtoken");
 app.use(cors());
 app.use(express.json());
 
+const verifyJwt = (req, res, next) => {
+  const authorization = req.headers.authorization;
+  if (!authorization) {
+    return res.status(401).send({ error: true, message: "unathorized token" });
+  }
+
+  const token = authorization.split(" ")[1];
+
+  // now verify
+  jwt.verify(token, process.env.SecretAccessToken, (err, decoded) => {
+    if (err) {
+      return res
+        .status(401)
+        .send({ error: true, message: "unathorized token" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
+
 app.get("/", (req, res) => {
   res.send("Corture savant");
 });
@@ -77,6 +97,22 @@ async function run() {
     // admin dashboard
     app.get("/users", async (req, res) => {
       const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
+    // verify admin for dashboard
+    app.get("/users/admin/:email", verifyJwt, async (req, res) => {
+      const userEmail = req.params.email;
+      console.log("usur", userEmail);
+      if (userEmail !== req.decoded.email) {
+        res.send({ admin: false });
+      }
+
+      const query = { email: userEmail };
+      const user = await userCollection.findOne(query);
+      // console.log("user", user);
+      // if user exist then match his role
+      const result = { admin: user?.role === "admin" };
       res.send(result);
     });
 
@@ -156,7 +192,7 @@ async function run() {
         },
       };
       const result = await classCollection.updateOne(filter, updateDoc);
-      console.log("updated", result);
+      // console.log("updated", result);
       res.send(result);
     });
 
